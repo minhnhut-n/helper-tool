@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
 )
 
 #thêm hàm từ các file khác vào chương trình này
-from app.services.task_service import get_progress, set_done
+from app.services.task_service import get_progress, get_task_progress, set_done
 from app.repositories.task_repo import get_all_tasks, create_task, delete_task
 
 #quản lý gui dưới dạng một class, và có các methods
@@ -63,8 +63,9 @@ class MainWindow(QMainWindow):
             siblings = by_parent.get(parent_id, [])
             for idx, task in enumerate(siblings, start=1):
                 display_index = f"{prefix}.{idx}" if prefix else str(idx)
+                task_progress = get_task_progress(task[0], tasks)
                 item = QListWidgetItem(
-                    f"{'  ' * level}{display_index} - {task[1]}"
+                    f"{'  ' * level}{display_index} - {task[1]} ({task_progress}%)"
                 )
                 item.setData(Qt.ItemDataRole.UserRole, task[0])
                 item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
