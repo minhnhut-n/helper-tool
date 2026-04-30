@@ -20,3 +20,6 @@ def get_progress():
     total = len(leaf_tasks)
 
     return round(done / total * 100, 2)
+
+def set_done(task_id, is_done):
+    task_repo.update_done(task_id, 1 if is_done else 0)
