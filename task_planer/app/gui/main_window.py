@@ -55,24 +55,41 @@ class MainWindow(QMainWindow):
 
         #lấy lại thông tin các task (để update nếu thêm hoặc xóa đi một task)
         tasks = get_all_tasks()
-        by_parent = {}
+        by_parent = {} #dictionary
         for task in tasks:
             by_parent.setdefault(task[2], []).append(task)
 
+        #hàm chỉ tồn tại khi refresh chạy
         def add_items(parent_id=None, level=0, prefix=""):
+            #lấy id của parent
             siblings = by_parent.get(parent_id, [])
+            #lặp qua các chỉ mục cùng level trong parent_id đó
             for idx, task in enumerate(siblings, start=1):
+            
+                #nếu không phải là prefix (child), thì chỉ cần nhập index (1., 2., ...)
                 display_index = f"{prefix}.{idx}" if prefix else str(idx)
+
+                #lấy progress hiện tại của task/subtask
                 task_progress = get_task_progress(task[0], tasks)
+
                 item = QListWidgetItem(
+                    #thụt đầu dòng tương ứng với level, hiển thị index sau đó
+                    #hiển thị nội dung task và task progress
                     f"{'  ' * level}{display_index} - {task[1]} ({task_progress}%)"
                 )
+
+                #mỗi item trong QT cho phép chứa 3 chỉ mục: text, icon, hide_data. thì cái này là hide_data
                 item.setData(Qt.ItemDataRole.UserRole, task[0])
+                #item checkbox (markdone)
                 item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                #task[5] = is_done, lấy trạng thái từ GUI
                 item.setCheckState(
                     Qt.CheckState.Checked if task[5] else Qt.CheckState.Unchecked
                 )
+                #thêm vào list widget
                 self.task_list.addItem(item)
+
+                #recursive check and process for next task (if have)
                 add_items(task[0], level + 1, display_index)
 
         add_items()

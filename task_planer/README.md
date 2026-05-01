@@ -221,43 +221,10 @@ get_leaf_tasks()
 
 ---
 
-## 13. 📌 Tree of this project (initial)
-task_planner/
-│
-├── app/
-│   ├── main.py
-│   │
-│   ├── config/
-│   │   └── settings.py
-│   │
-│   ├── database/
-│   │   ├── db.py
-│   │   └── schema.sql
-│   │
-│   ├── models/
-│   │   └── task.py
-│   │
-│   ├── repositories/
-│   │   └── task_repo.py
-│   │
-│   ├── services/
-│   │   └── task_service.py
-│   │
-│   ├── utils/
-│   │   └── tree.py
-│   │
-│   ├── gui/
-│   │   ├── task_widget.py
-│   │   ├── main_window.py
-│   │   └── dialogs/
-│   │       └── create_task_dialog.py
-│   │
-│   └── notifications/
-│       └── notifier.py
-│
-├── data/
-│   └── app.db
-│
-├── requirements.txt
-└── run.py
+## 13. Chart of tool
+![Overrall current packages on Tool](image.png)
+
+![Database logic](image-1.png)
+
+![Main GUI logic](image-2.png)
 ---

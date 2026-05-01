@@ -27,6 +27,7 @@ def get_all_tasks():
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM tasks ORDER BY id ASC")
+    #trả lại nội dung của dòng
     rows = cursor.fetchall()
 
     conn.close()
