@@ -222,13 +222,15 @@ get_leaf_tasks()
 ---
 
 ## 13. Chart of tool
-![Overrall current packages on Tool](image.png)
+<center>
+  ![Overrall current packages on Tool](docs/image/image.png)
+</center>
 
-![Database logic](image-1.png)
+![Database logic](docs/image/image-1.png)
 
-![Main GUI logic](image-2.png)
+![Main GUI logic](docs/image/image-2.png)
 
-![Feature API logic](image-3.png)
+![Feature API logic](docs/image/image-3.png)
 
-![Service logic](image-4.png)
+![Service logic](docs/image/image-4.png)
 ---

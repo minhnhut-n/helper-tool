@@ -1,5 +1,5 @@
 ﻿# bộ công cụ open source từ QT
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout,
     QPushButton, QLabel, QListWidget, QListWidgetItem, QInputDialog
@@ -78,6 +78,12 @@ class MainWindow(QMainWindow):
                     f"{'  ' * level}{display_index} - {task[1]} ({task_progress}%)"
                 )
 
+                #làm đậm title của các project root để dễ phân biệt
+                if level == 0:
+                    font = item.font()
+                    font.setBold(True)
+                    item.setFont(font)
+
                 #mỗi item trong QT cho phép chứa 3 chỉ mục: text, icon, hide_data. thì cái này là hide_data
                 item.setData(Qt.ItemDataRole.UserRole, task[0])
                 #item checkbox (markdone)
@@ -91,6 +97,16 @@ class MainWindow(QMainWindow):
 
                 #recursive check and process for next task (if have)
                 add_items(task[0], level + 1, display_index)
+
+                #thêm khoảng cách nhỏ giữa các parent root để list đỡ rối hơn
+                if level == 0 and idx < len(siblings):
+                    #tạo object string empty
+                    spacer = QListWidgetItem("")
+                    #không thể tương tác với object từ user
+                    spacer.setFlags(Qt.ItemFlag.NoItemFlags)
+                    #set size and add item
+                    spacer.setSizeHint(QSize(0, 10))
+                    self.task_list.addItem(spacer)
 
         add_items()
 
