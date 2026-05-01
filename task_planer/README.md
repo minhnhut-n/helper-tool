@@ -227,4 +227,8 @@ get_leaf_tasks()
 ![Database logic](image-1.png)
 
 ![Main GUI logic](image-2.png)
+
+![Feature API logic](image-3.png)
+
+![Service logic](image-4.png)
 ---

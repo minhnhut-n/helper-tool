@@ -26,6 +26,7 @@ def get_all_tasks():
     conn = get_connection()
     cursor = conn.cursor()
 
+    #ascending ASC
     cursor.execute("SELECT * FROM tasks ORDER BY id ASC")
     #trả lại nội dung của dòng
     rows = cursor.fetchall()

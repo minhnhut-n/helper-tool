@@ -32,16 +32,19 @@ def get_task_progress(task_id, tasks=None):
         by_id[task[0]] = task
         by_parent.setdefault(task[2], []).append(task)
 
+    #get task_id level (main task/ sub-task) lấy làm root
     root = by_id.get(task_id)
     if root is None:
         return 0
 
-    subtree = []
+    subtree = [] #đây là tree
     stack = [root]
     while stack:
         node = stack.pop()
         subtree.append(node)
-        stack.extend(by_parent.get(node[0], []))
+        #depth first search, get child of this task, task is now consider as parent
+        #and will be used to search in next time
+        stack.extend(by_parent.get(node[0], [])) #return a list of child of this parent task id
 
     return get_progress(subtree)
 
