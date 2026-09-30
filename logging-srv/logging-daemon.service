@@ -1,0 +1,15 @@
+[Unit]
+Description=Linux logging daemon
+After=local-fs.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/logging-srv
+ExecStart=/opt/logging-srv/run-logging.sh
+Restart=on-failure
+RestartSec=2
+User=logger
+Group=logger
+
+[Install]
+WantedBy=multi-user.target
