@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -38,13 +40,17 @@ static int write_log_entry(int file_fd, off_t *file_offset,
         return -1;
     }
 
-    if (*file_offset + line_length > LOG_FILE_SIZE) {
+    if (*file_offset + (off_t)line_length > (off_t)LOG_FILE_SIZE) {
         *file_offset = 0;
     }
 
+    const char *write_ptr = line;
+    if (lseek(file_fd, *file_offset, SEEK_SET) < 0) {
+        return -1;
+    }
+
     while (line_length > 0) {
-        ssize_t written = pwrite(file_fd, line, (size_t)line_length,
-                                 *file_offset);
+        ssize_t written = write(file_fd, write_ptr, (size_t)line_length);
         if (written < 0) {
             if (errno == EINTR) {
                 continue;
@@ -56,7 +62,7 @@ static int write_log_entry(int file_fd, off_t *file_offset,
         }
 
         *file_offset += written;
-        line += written;
+        write_ptr += written;
         line_length -= (int)written;
     }
 
