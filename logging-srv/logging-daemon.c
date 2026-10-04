@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <errno.h>
+#include <time.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -23,8 +24,10 @@ static int open_log_file(void) {
     return file_fd;
 }
 
+//open file and write
 static int write_log_entry(int file_fd, off_t *file_offset,
                            const log_entry_t *log_entry) {
+    // init
     char line[MAX_LOG_LEN + 64];
     int line_length = snprintf(
         line, sizeof(line), "[%llu] [%s] %s\n",
@@ -32,6 +35,7 @@ static int write_log_entry(int file_fd, off_t *file_offset,
         log_entry->level == LOG_INFO ? "INFO" : "DEBUG",
         log_entry->msg);
 
+    // check & setting
     if (line_length < 0 || (size_t)line_length >= sizeof(line)) {
         return -1;
     }
@@ -49,7 +53,9 @@ static int write_log_entry(int file_fd, off_t *file_offset,
         return -1;
     }
 
+    //perform action
     while (line_length > 0) {
+        //function write with pointer set
         ssize_t written = write(file_fd, write_ptr, (size_t)line_length);
         if (written < 0) {
             if (errno == EINTR) {
@@ -85,7 +91,15 @@ void run_logging_deamon(void) {
         uint32_t tail = atomic_load_explicit(&g_log_ring.tail, memory_order_relaxed);
 
         if (tail == head) {
-            usleep(10000); //10ms
+            const struct timespec delay = {
+                .tv_sec = 0,
+                .tv_nsec = 10 * 1000 * 1000
+            };
+            struct timespec remaining = delay;
+
+            while (nanosleep(&remaining, &remaining) == -1 && errno == EINTR) {
+                // Continue waiting
+            }
             continue;
         }
 

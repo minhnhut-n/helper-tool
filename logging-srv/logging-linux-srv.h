@@ -19,7 +19,7 @@ extern "C" {
 #define LOGGER_COMMON_H
 #define RING_BUFFER_SZ 1024
 #define MAX_LOG_LEN    128
-#define LOG_FILE_PATH  "/opt/logging-srv/logging.log"
+#define LOG_FILE_PATH  "/tmp/logging.log"
 #define LOG_FILE_SIZE  (1024u * 1024u)
 
 typedef enum {

@@ -2,7 +2,7 @@
 set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-BINARY="$SCRIPT_DIR/logging-daemon"
+BINARY="$SCRIPT_DIR/logger-daemon"
 
 if [ ! -x "$BINARY" ]; then
     echo "logging daemon binary not found or not executable: $BINARY" >&2
