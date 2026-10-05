@@ -29,6 +29,7 @@ typedef enum {
 
 //data struct for a log entry
 typedef struct {
+    LOGGER_ATOMIC(uint32_t) committed; // 0 = đang ghi dở, 1 = đã publish
     uint64_t timestamp;
     uint8_t level;
     char msg[MAX_LOG_LEN];

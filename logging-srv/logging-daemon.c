@@ -77,7 +77,10 @@ static int write_log_entry(int file_fd, off_t *file_offset,
 
 //logging at background
 void run_logging_deamon(void) {
-    log_entry_t log_entry;
+    // local copy: KHÔNG copy nguyên struct (chứa _Atomic), chỉ copy payload
+    uint64_t ts;
+    uint8_t lv;
+    char msg[MAX_LOG_LEN];
     off_t file_offset = 0;
     int file_fd = open_log_file();
 
@@ -104,9 +107,28 @@ void run_logging_deamon(void) {
         }
 
         uint32_t print_idx = tail & (RING_BUFFER_SZ-1);
-        log_entry = g_log_ring.entry[print_idx];
 
+        // đợi producer ghi xong slot này (publish qua committed, acquire để thấy msg)
+        if (atomic_load_explicit(&g_log_ring.entry[print_idx].committed,
+                                 memory_order_acquire) == 0) {
+            const struct timespec spin = { .tv_sec = 0, .tv_nsec = 1000 }; // 1us
+            nanosleep(&spin, NULL);
+            continue; // chưa tăng tail -> thử lại slot này
+        }
+
+        ts = g_log_ring.entry[print_idx].timestamp;
+        lv = g_log_ring.entry[print_idx].level;
+        memcpy(msg, g_log_ring.entry[print_idx].msg, MAX_LOG_LEN);
+        msg[MAX_LOG_LEN - 1] = '\0';
+
+        // reset cờ + giải phóng slot cho vòng sau
+        atomic_store_explicit(&g_log_ring.entry[print_idx].committed, 0, memory_order_relaxed);
         atomic_store_explicit(&g_log_ring.tail, tail+1, memory_order_release);
+
+        log_entry_t log_entry;
+        log_entry.timestamp = ts;
+        log_entry.level = lv;
+        memcpy(log_entry.msg, msg, MAX_LOG_LEN);
 
         if (write_log_entry(file_fd, &file_offset, &log_entry) != 0) {
             perror("cannot write log file");
