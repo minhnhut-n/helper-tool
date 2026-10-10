@@ -1,4 +1,4 @@
-/** For public method logging
+/** Public interface for application code
  * Owner: minhnhut.n
  * Date: 10/10/2026
  */
@@ -15,23 +15,19 @@ typedef enum {
 /**
  * for initial logger service with 2 options
  * option 1: default with arg= void, using available tty0
- * option 2: specific a tty serial port to export
  */
-int logger_init(void);
-int logger_init(const char* tty_dev);
+int logger_init(const char *sock_path);
 
 /**
  * method to write log, with ring buffer machanism
  * level: info/debug/force(tty)/error(force)
  * msg  : const message can not modify
  */
-void logger_ring(log_type_t level, const char* msg);
+void logger(log_type_t level, const char* msg);
 
 /**
- * method to write log, with socket machanism
- * level: info/debug/force(tty)/error(force)
- * msg  : const message can not modify
+ * method to close connect
  */
-void logger_socket(log_type_t level, const char* msg);
+void logger_close(void);
 
 #endif
