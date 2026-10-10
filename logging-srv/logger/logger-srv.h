@@ -21,10 +21,17 @@ int logger_init(void);
 int logger_init(const char* tty_dev);
 
 /**
- * method to write log
+ * method to write log, with ring buffer machanism
  * level: info/debug/force(tty)/error(force)
  * msg  : const message can not modify
  */
-void logger(log_type_t level, const char* msg);
+void logger_ring(log_type_t level, const char* msg);
+
+/**
+ * method to write log, with socket machanism
+ * level: info/debug/force(tty)/error(force)
+ * msg  : const message can not modify
+ */
+void logger_socket(log_type_t level, const char* msg);
 
 #endif

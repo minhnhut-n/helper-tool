@@ -3,6 +3,9 @@
 #include <stdatomic.h>
 #include <string.h>
 
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "logger-srv.h"
 #define BUFFER_SIZE 1024;
 
@@ -12,10 +15,10 @@ typedef struct {
     string ring_slot[BUFFER_SIZE];
 } ring_package_t;
 
-ring_package_t g_ring;
+static ring_package_t g_ring;
 
 // luồng ghi
-void logger(log_type_t level, const char* msg) {
+void logger_ring(log_type_t level, const char* msg) {
 
     // cơ chế ring buffer, ghi tại head, đọc tại tail, tránh gây race condition
     uint32_t head, tail;
@@ -36,6 +39,4 @@ void logger(log_type_t level, const char* msg) {
     
     // ghi ring và cập nhật vào general memory space
     atomic_store_explicit(&g_ring.head, head+1, memory_order_release);
-
-    return 0;
 }
