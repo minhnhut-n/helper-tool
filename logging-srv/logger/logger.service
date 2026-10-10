@@ -1,0 +1,14 @@
+[Unit]
+Description=system-logger
+After=logger.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/logger
+User=aelius
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
