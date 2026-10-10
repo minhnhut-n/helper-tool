@@ -5,7 +5,7 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/logger
+ExecStart=/usr/bin/logger_daemon
 User=aelius
 Restart=always
 RestartSec=1

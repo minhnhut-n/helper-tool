@@ -16,6 +16,7 @@ static log_ring_buffer_t g_ringbuf = {.head=0, .tail=0};
 
 //background worker
 void* worker_thread(void *arg) {
+    (void) arg;
     log_item_t item;
     while(1) {
         if (ring_buffer_pop(&g_ringbuf, &item) < 0) {
@@ -74,7 +75,7 @@ int main(void) {
      * socket() -> (optional) -> bind() -> listen() -> accept() -> read()/write()
      * close() --- this is when system shutdown.
      */
-    while(true) {
+    while(1) {
         //only accept file descriptor, dont case other things else
         int client_fd = accept(server_fd, NULL, NULL);
         if (client_fd < 0) {
@@ -83,16 +84,16 @@ int main(void) {
 
         char buffer[512];
         ssize_t socket_data_size;
-        while ((socket_data_size = read(client_fd, buffer, sizeof(buffer)-1)) > 0) (
+        while ((socket_data_size = read(client_fd, buffer, sizeof(buffer)-1)) > 0) {
             //raw byte read return
-            buffer[n] = '\0'; // add endline
+            buffer[socket_data_size] = '\0'; // add endline
             int level = LOG_DEBUG;
             char msg[256];
             //sscanf return the number successfully assign for with success case.
-            if (sscanf(buffer, "%d: %255[^\n]", &level, &msg) == 2) {
+            if (sscanf(buffer, "%d: %255[^\n]", &level, msg) == 2) {
                 ring_buffer_push(&g_ringbuf, level, msg);
             }
-        )
+        }
         //client done -> close()
         close(client_fd);
     }
@@ -101,4 +102,3 @@ int main(void) {
     unlink(SOCK_PATH);
     return 0;
 }
-

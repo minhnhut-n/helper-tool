@@ -1,6 +1,6 @@
 # Environment declaration first
 CC = gcc
-CFLAGS = -Wall -Wextra -pthread -I.
+CFLAGS = -std=gnu11 -Wall -Wextra -pthread -I.
 
 # next, output file name are specified. <name>.o
 DAEMON_SRCS = logger-daemon.c ring_buffer.c

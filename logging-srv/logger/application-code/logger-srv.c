@@ -1,10 +1,11 @@
 // src/client/logger.c
-#include "logger.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+
+#include "logger-srv.h"
 
 static int g_sock_fd = -1;
 
@@ -25,7 +26,7 @@ int logger_init(const char *socket_path) {
     return 0;
 }
 
-void logger(int level, const char *message) {
+void logger(log_type_t level, const char *message) {
     if (g_sock_fd < 0) return;
 
     char buffer[512];
