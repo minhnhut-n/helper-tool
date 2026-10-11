@@ -25,7 +25,7 @@ void* worker_thread(void *arg) {
         }
         //action we want to work with this log, temporary, just print it out
         //to journalctl        
-        printf("Daemon process: %d, %s", item.level, item.msg);
+        printf("Daemon process: %d, %s\n", item.level, item.msg);
         fflush(stdout); //function to push infomation to "stdout"     
     }
     //not expect jump to this line
@@ -83,15 +83,32 @@ int main(void) {
         }
 
         char buffer[512];
+        char line[512];
+        size_t line_length = 0;
+        int discarding_line = 0;
         ssize_t socket_data_size;
-        while ((socket_data_size = read(client_fd, buffer, sizeof(buffer)-1)) > 0) {
-            //raw byte read return
-            buffer[socket_data_size] = '\0'; // add endline
-            int level = LOG_DEBUG;
-            char msg[256];
-            //sscanf return the number successfully assign for with success case.
-            if (sscanf(buffer, "%d: %255[^\n]", &level, msg) == 2) {
-                ring_buffer_push(&g_ringbuf, level, msg);
+        while ((socket_data_size = read(client_fd, buffer, sizeof(buffer))) > 0) {
+            for (ssize_t i = 0; i < socket_data_size; i++) {
+                if (buffer[i] == '\n') {
+                    if (!discarding_line) {
+                        line[line_length] = '\0';
+                        int level = LOG_DEBUG;
+                        char msg[256];
+                        if (sscanf(line, "%d: %255[^\r\n]", &level, msg) == 2) {
+                            ring_buffer_push(&g_ringbuf, level, msg);
+                        }
+                    }
+                    line_length = 0;
+                    discarding_line = 0;
+                } else if (!discarding_line) {
+                    if (line_length < sizeof(line) - 1) {
+                        line[line_length++] = buffer[i];
+                    } else {
+                        fprintf(stderr, "Discarding oversized log message\n");
+                        line_length = 0;
+                        discarding_line = 1;
+                    }
+                }
             }
         }
         //client done -> close()
