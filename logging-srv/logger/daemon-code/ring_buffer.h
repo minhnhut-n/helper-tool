@@ -17,6 +17,7 @@ typedef enum {
 typedef struct {
     log_type_t level;
     char msg[LOG_MESSAGE_SIZE];
+    atomic_int committed;
 } log_item_t;
 
 //ring buffer
