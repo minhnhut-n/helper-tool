@@ -11,6 +11,7 @@
 
 #include "ring_buffer.h"
 #define SOCK_PATH "/tmp/logger.sock"
+#define FILE_PATH "/home/aelius/envDev/logger.log"
 
 static log_ring_buffer_t g_ringbuf = {.head=0, .tail=0};
 
@@ -25,8 +26,17 @@ void* worker_thread(void *arg) {
         }
         //action we want to work with this log, temporary, just print it out
         //to journalctl        
-        printf("Daemon process: %d, %s\n", item.level, item.msg);
-        fflush(stdout); //function to push infomation to "stdout"     
+        // printf("Daemon process: %d, %s\n", item.level, item.msg);
+        // fflush(stdout); //function to push infomation to "stdout" 
+        
+        FILE *file = fopen(FILE_PATH, "a");
+        if (file != NULL) {
+            fprintf(file, "%d : %s\n", item.level, item.msg);
+            fclose(file);
+        }
+        else {
+            printf("can not create file log\n");
+        }
     }
     //not expect jump to this line
     return NULL;
