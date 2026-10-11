@@ -1,6 +1,6 @@
 [Unit]
 Description=system-logger
-After=logger.service
+After=network.target systemd-journald.service
 StartLimitIntervalSec=0
 
 [Service]
