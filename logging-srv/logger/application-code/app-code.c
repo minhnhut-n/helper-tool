@@ -8,7 +8,7 @@ void *doJob1(void *arg) {
     (void)arg;
     int i = 0;
     while (i<4) {
-        logger(LOG_DEBUG, "nhut job1");
+        logger(LOG_FORCE, "nhut job1, %d", i);
         i++;
     }
     return NULL;
@@ -17,7 +17,7 @@ void *doJob2(void *arg) {
     (void)arg;
     int i = 0;
     while (i<5) {
-        logger(LOG_DEBUG, "nhut job2");
+        logger(LOG_INFO, "nhut job2, %d", i);
         i++;
     }
     return NULL;
