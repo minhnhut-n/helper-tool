@@ -42,6 +42,8 @@ void logger(log_type_t level, const char* fmt, ...) {
     int totalLen = headLen+bodyLen;
     if (totalLen >= MAX_BUFFER-1) totalLen = MAX_BUFFER-2;
     
+    //totalLen -1  is real content, so totalLen index will be  '\n'
+    //we need to send this to daemon, because daemon use fgets() -> need \n to detect
     buffer[totalLen++] = '\n';
     buffer[totalLen] = '\0';
     
