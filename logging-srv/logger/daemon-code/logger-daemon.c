@@ -14,6 +14,15 @@
 #define FILE_PATH "/home/aelius/envDev/logger.log"
 
 static log_ring_buffer_t g_ringbuf = {.head=0, .tail=0};
+const char *get_level_str(int level) {
+    switch (level) {
+        case LOG_INFO:  return "INFO";
+        case LOG_DEBUG: return "DEBUG";
+        case LOG_ERROR: return "ERROR";
+        case LOG_FORCE: return "FORCE";
+        default:        return "UNKNOWN";
+    }
+}
 
 //background worker
 void* worker_thread(void *arg) {
@@ -28,14 +37,14 @@ void* worker_thread(void *arg) {
         //to journalctl        
         // printf("Daemon process: %d, %s\n", item.level, item.msg);
         // fflush(stdout); //function to push infomation to "stdout" 
-        
+
         FILE *file = fopen(FILE_PATH, "a");
         if (file != NULL) {
-            fprintf(file, "%d : %s\n", item.level, item.msg);
+            fprintf(file, "[%s]: %s\n", get_level_str(item.level), item.msg);
             fclose(file);
         }
         else {
-            printf("can not create file log\n");
+            fprintf(stderr, "can not create file log\n");
         }
     }
     //not expect jump to this line
@@ -55,13 +64,15 @@ void handle_client(int client_fd) {
     while (fgets(line, sizeof(line), stream) != NULL) {
         size_t len = strlen(line);
 
-        //handle over buffer case
+        // 1. Log was not fully write check
         if (len > 0 && line[len - 1] != '\n' && !feof(stream)) {
             fprintf(stderr, "Discarding oversized log message\n");
             int c;
-            //wipe out to the end of oversize log
+            // 2. If overbuffer, wipe out until meet '\n'.
+            // If dont have \n wipe until reach eof
             while ((c = fgetc(stream)) != EOF && c != '\n');
-            continue;
+            // 3. next line
+            continue; 
         }
 
         //replace end of line by line terminal

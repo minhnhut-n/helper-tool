@@ -23,7 +23,7 @@ int logger_init(const char *sock_path);
  * level: info/debug/force(tty)/error(force)
  * msg  : const message can not modify
  */
-void logger(log_type_t level, const char* msg);
+void logger(log_type_t level, const char* fmt, ...);
 
 /**
  * method to close connect

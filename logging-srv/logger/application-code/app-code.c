@@ -26,7 +26,7 @@ void *doJob3(void *arg) {
     (void)arg;
     int i = 0;
     while (i<6) {
-        logger(LOG_DEBUG, "nhut job3");
+        logger(LOG_DEBUG, "nhut job3, %d", i);
         i++;
     }
     return NULL;
