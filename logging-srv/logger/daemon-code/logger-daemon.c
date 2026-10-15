@@ -42,6 +42,42 @@ void* worker_thread(void *arg) {
     return NULL;
 }
 
+void handle_client(int client_fd) {
+    //bound a stream
+    FILE *stream = fdopen(client_fd, "r");
+    if (!stream) {
+        close(client_fd);
+        return;
+    }
+
+    char line[512];
+    //get a line until we met \n, eof or full buffer
+    while (fgets(line, sizeof(line), stream) != NULL) {
+        size_t len = strlen(line);
+
+        //handle over buffer case
+        if (len > 0 && line[len - 1] != '\n' && !feof(stream)) {
+            fprintf(stderr, "Discarding oversized log message\n");
+            int c;
+            //wipe out to the end of oversize log
+            while ((c = fgetc(stream)) != EOF && c != '\n');
+            continue;
+        }
+
+        //replace end of line by line terminal
+        line[strcspn(line, "\r\n")] = '\0';
+
+        int level = 0;
+        char msg[256];
+        if (sscanf(line, "%d: %255[^\r\n]", &level, msg) == 2) {
+            ring_buffer_push(&g_ringbuf, level, msg);
+        }
+    }
+
+    fclose(stream);
+    //close stream will auto close fd also
+    //we dont need to close  client_fd anymore.
+}
 
 //main logic
 int main(void) {
@@ -78,51 +114,19 @@ int main(void) {
     //background worker call
     pthread_t worker;
     pthread_create(&worker, NULL, worker_thread, NULL);
-
+    pthread_detach(worker);
     // in socket tcp server, we need to open a listen for client search
     /**
      * the process is 
      * socket() -> (optional) -> bind() -> listen() -> accept() -> read()/write()
      * close() --- this is when system shutdown.
      */
-    while(1) {
-        //only accept file descriptor, dont case other things else
+    while (1) {
         int client_fd = accept(server_fd, NULL, NULL);
         if (client_fd < 0) {
             continue;
         }
-
-        char buffer[512];
-        char line[512];
-        size_t line_length = 0;
-        int discarding_line = 0;
-        ssize_t socket_data_size;
-        while ((socket_data_size = read(client_fd, buffer, sizeof(buffer))) > 0) {
-            for (ssize_t i = 0; i < socket_data_size; i++) {
-                if (buffer[i] == '\n') {
-                    if (!discarding_line) {
-                        line[line_length] = '\0';
-                        int level = LOG_DEBUG;
-                        char msg[256];
-                        if (sscanf(line, "%d: %255[^\r\n]", &level, msg) == 2) {
-                            ring_buffer_push(&g_ringbuf, level, msg);
-                        }
-                    }
-                    line_length = 0;
-                    discarding_line = 0;
-                } else if (!discarding_line) {
-                    if (line_length < sizeof(line) - 1) {
-                        line[line_length++] = buffer[i];
-                    } else {
-                        fprintf(stderr, "Discarding oversized log message\n");
-                        line_length = 0;
-                        discarding_line = 1;
-                    }
-                }
-            }
-        }
-        //client done -> close()
-        close(client_fd);
+        handle_client(client_fd);
     }
     //not expect jump to this case, only when system shut down
     close(server_fd);
