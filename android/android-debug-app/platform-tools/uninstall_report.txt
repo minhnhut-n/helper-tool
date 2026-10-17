@@ -1,0 +1,17 @@
+Android App Cleaner report - 2026-10-17T15:09:56.808014
+
+com.agoda.mobile.consumer: Success
+com.epi: Success
+com.facebook.katana: Success
+com.google.android.apps.docs: Success
+com.google.android.apps.magazines: Success
+com.google.android.apps.photos: Success
+com.google.android.apps.tachyon: Success
+com.google.android.apps.youtube.music: Success
+com.google.android.videos: Success
+com.lazada.android: Success
+com.opera.browser: Success
+com.opera.preinstall: Success
+com.xb.topnews: Success
+com.zing.mp3: Success
+com.zing.zalo: Success

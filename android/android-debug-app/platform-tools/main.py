@@ -1,17 +1,21 @@
 
+#cho phép spawn một process và tương tác với IO của device, nhận giá trị trả về từ debugger
+#kiểm soát luồng nhập xuất
 import subprocess
+#phục vụ cho các thao tác với các dòng lệnh, terminal, argc, argv,...
 import sys
+#lấy ngày giờ từ hệ thống
 from datetime import datetime
+#cho phép set/get các path trong directory, phục vụ tốt cho resource
 from pathlib import Path
 
-
+"""Run adb and return its output."""
 def run_adb(args):
-    """Run adb and return its output."""
     result = subprocess.run(
         ["adb", *args],
         capture_output=True,
         text=True,
-        encoding="utf-8",
+        encoding="utf-8", #decode type
         errors="replace",
         timeout=60,
     )
@@ -22,21 +26,27 @@ def run_adb(args):
 
     return result.stdout.strip()
 
-
+"""check an android device is connected or not"""
 def check_device():
     try:
-        output = run_adb(["devices"])
+        output = run_adb(["devices"]) #tham số của adb tool
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"Cannot run ADB: {exc}")
         print("Install Platform-Tools and add adb to PATH.")
         sys.exit(1)
 
     devices = [
+        #truy xuất phần tử đầu tiên của line
         line.split()[0]
+
+        #các phần tử từ thứ 2 trở đi
         for line in output.splitlines()[1:]
-        if len(line.split()) >= 2
-        and line.split()[1] == "device"
+
+        #EQR4NBPFZ9ZLAUUC        device
+        #Xác định số lượng cột của phần tử và autority status
+        if len(line.split()) >= 2 and line.split()[1] == "device"
     ]
+    ##expected result: [<device name> <arg list> <true/false>]
 
     if len(devices) != 1:
         print(output)
@@ -48,7 +58,7 @@ def check_device():
 
     print(f"Connected device: {devices[0]}")
 
-
+""""fcn that help to list all available to uninstall"""
 def get_user_apps():
     output = run_adb(["shell", "pm", "list", "packages", "-3"])
     packages = []
@@ -60,7 +70,7 @@ def get_user_apps():
 
     return sorted(set(packages))
 
-
+"""helper fcn to remove a specific app"""
 def uninstall_package(package):
     return run_adb([
         "shell", "pm", "uninstall", "--user", "0", package
@@ -83,14 +93,14 @@ def main():
     print(f"\nFound {len(packages)} user-installed packages:\n")
 
     for index, package in enumerate(packages, start=1):
-        print(f"{index:3}. {package}")
+        print(f"{index:3}. {package}") #quy định độ rộng tối thiểu là 3 kí tự sau dấu :
 
     print("\nOptions:")
     print("  all  - Remove ALL listed user-installed apps")
     print("  q    - Quit without changes")
     print("  Or enter package numbers separated by commas.")
 
-    choice = input("Selection: ").strip()
+    choice = input("Selection: ").strip() #remove the leading and trailing whitespace (back and fore)
 
     if choice.lower() == "q":
         print("Cancelled.")
@@ -101,6 +111,9 @@ def main():
     else:
         try:
             indexes = sorted({
+                # for 2 cases: => [1,2,3]
+                #   - 1,2,3
+                #   - 1,   2, 3
                 int(part.strip()) for part in choice.split(",")
             })
 
@@ -114,6 +127,7 @@ def main():
             print("Invalid selection. Nothing was removed.")
             return
 
+        #make a list selected
         selected = [packages[index - 1] for index in indexes]
 
     print(f"\nSelected {len(selected)} package(s) for removal:")
@@ -138,6 +152,7 @@ def main():
         "",
     ]
 
+    #loop in remove packages
     for package in selected:
         try:
             result = uninstall_package(package)
