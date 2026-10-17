@@ -10,8 +10,9 @@
 #include <sys/un.h>
 
 #include "ring_buffer.h"
+#define MAX_FILE_PATH 128
 #define SOCK_PATH "/tmp/logger.sock"
-#define FILE_PATH "/home/aelius/envDev/logger.log"
+#define FILE_PATH "/home/aelius/envDev/record"
 
 static log_ring_buffer_t g_ringbuf = {.head=0, .tail=0};
 const char *get_level_str(int level) {
@@ -33,12 +34,18 @@ void* worker_thread(void *arg) {
             usleep(1000); // avoid overhead CPU
             continue;
         }
-        //action we want to work with this log, temporary, just print it out
-        //to journalctl        
-        // printf("Daemon process: %d, %s\n", item.level, item.msg);
-        // fflush(stdout); //function to push infomation to "stdout" 
 
-        FILE *file = fopen(FILE_PATH, "a");
+        time_t timeVar = time(NULL);
+        struct tm *tm_info = localtime(&timeVar);
+        
+        char writePath[MAX_FILE_PATH];
+        snprintf(writePath, MAX_FILE_PATH, "%s_%02d%02d%d.log",
+                FILE_PATH,
+                tm_info->tm_mday,
+                tm_info->tm_mon+1,
+                tm_info->tm_year + 1900);
+
+        FILE *file = fopen(writePath, "a");
         if (file != NULL) {
             fprintf(file, "[%s]: %s\n", get_level_str(item.level), item.msg);
             fclose(file);
